@@ -5,3 +5,9 @@ handler calls services
 
 current services:
 -weather
+
+How to run?
+```go run main.go -t [token]```
+
+How to build?
+```go build .```
