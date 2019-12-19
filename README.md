@@ -1,4 +1,4 @@
-# AlphaBot is your source for a well written discord go bot
+# AlphaBot is a Discord bot in Golang
 
 ## How does it work?
 * main.go starts the bot -> calls addHandler on the api handler
