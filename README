@@ -1,1 +1,7 @@
 AlphaBot is your source for a well written discord go bot
+
+main starts the bot -> only handler is the api handler
+handler calls services
+
+current services:
+-weather
