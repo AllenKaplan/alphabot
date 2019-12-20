@@ -2,6 +2,7 @@ package meetup
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -11,9 +12,13 @@ type MeetupService struct{
 }
 
 type Meetup struct {
-	name string
-	location string
-	time time.Time
+	Name string
+	Location string
+	Time time.Time
+}
+
+func (m Meetup) String() string {
+	return fmt.Sprintf("%s | %s | %s", m.Name, m.Location, m.Time)
 }
 
 func NewMeetupClient(ctx context.Context) MeetupService {
@@ -32,12 +37,12 @@ func (s MeetupService) CreateMeetup(req string) (string, error) {
 	}
 
 	meetupToInsert := &Meetup{
-		name:     params[0],
-		location: params[1],
-		time:     meetupTime,
+		Name:     params[0],
+		Location: params[1],
+		Time:     meetupTime,
 	}
 
-	res, err := s.CreateMeetup(meetupToInsert)
+	res, err := Cr
 	if err != nil {
 		return "", err
 	}
