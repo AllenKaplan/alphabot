@@ -19,17 +19,38 @@ type Client struct {
 }
 
 type Router struct {
-	routes map[string]interface{}
+	routes map[*Route]interface{}
+}
+
+type Route struct {
+	string
+	description string
 }
 
 func (r *Router) handleRoute(c *Client) {
 	cmd := c.ctx.Value("cmd").(string)
 
+	if strings.HasPrefix(cmd, "help") {
+		r.help(c)
+	}
+
 	for routeName, routeFunc := range r.routes {
-		if strings.HasPrefix(cmd, routeName) {
+		if strings.HasPrefix(cmd, routeName.string) {
 			log.Printf("Route found based on command | %s -> %s", cmd, routeName)
 			routeFunc.(func())()
 		}
+	}
+}
+
+func (r *Router) help(c *Client) {
+	var res string
+
+	for route := range r.routes {
+		res = res + "\n" + route.description
+	}
+
+	if msg, err := c.session.ChannelMessageSend(c.message.ChannelID, res); err != nil {
+		log.Printf("error sending message | %v | %v", msg, err)
 	}
 }
 
@@ -53,9 +74,9 @@ func Handler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	cmd = strings.TrimPrefix(client.message.Content, prefix)
 	client.ctx = context.WithValue(client.ctx, "cmd", cmd)
 
-	routes := map[string]interface{}{
-		"weather": client.Weather,
-		"meetup":  client.Meetup,
+	routes := map[*Route]interface{}{
+		&Route{"weather", "`,weather get [location]` - Gets weather information "}: client.Weather,
+		&Route{"meetup", "`,meetup help` - Gets meetup information"}:               client.Meetup,
 	}
 
 	router := &Router{routes: routes}
@@ -70,8 +91,8 @@ func (client *Client) Weather() {
 	cmd = strings.TrimPrefix(cmd, "weather ")
 	client.ctx = context.WithValue(client.ctx, "cmd", cmd)
 
-	routes := map[string]interface{}{
-		"get": client.GetWeather,
+	routes := map[*Route]interface{}{
+		&Route{"get", "`,weather get [location]` - gets the weather for a location"}: client.GetWeather,
 	}
 
 	weatherRouter := &Router{routes: routes}
@@ -86,9 +107,9 @@ func (client *Client) Meetup() {
 	cmd = strings.TrimPrefix(cmd, "meetup ")
 	client.ctx = context.WithValue(client.ctx, "cmd", cmd)
 
-	routes := map[string]interface{}{
-		"get":    client.GetMeetup,
-		"create": client.CreateMeetup,
+	routes := map[*Route]interface{}{
+		&Route{"get", "`,meetup get [name|all]` - gets a specific meetup or all meetups"}:                                                                 client.GetMeetup,
+		&Route{"create", "`,meetup create [name] [location] [date] [time]` - creates a meetup; use quotations if name or location is more than one word"}: client.CreateMeetup,
 	}
 
 	meetupRouter := &Router{routes: routes}
@@ -115,15 +136,15 @@ func (client *Client) GetWeather() {
 		Color:       0x0000ff,                        // Blue
 		Description: "`,weather get [location]`",
 		Fields: []*discordgo.MessageEmbedField{
-			&discordgo.MessageEmbedField{
+			{
 				Name: "Temperature",
 				Value: fmt.Sprintf("%.1f	°C", res.Main.Temp),
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:  "Full Weather Desc",
 				Value: strings.Title(res.Weather[0].Description),
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:  "Humidity",
 				Value: strconv.Itoa(res.Main.Humidity),
 			},
@@ -183,15 +204,15 @@ func (client *Client) GetMeetup() {
 		Color:       0xff00ff,                            // Blue
 		Description: "Meetup Info `,meetup get [name]`",
 		Fields: []*discordgo.MessageEmbedField{
-			&discordgo.MessageEmbedField{
+			{
 				Name:  "Name",
 				Value: meetupRes.Name,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:  "Location",
 				Value: meetupRes.Location,
 			},
-			&discordgo.MessageEmbedField{
+			{
 				Name:  "Time",
 				Value: meetupRes.Time.Format(time.RFC3339),
 			},

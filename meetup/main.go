@@ -12,13 +12,13 @@ import (
 
 type MeetupService struct {
 	context.Context
-	repo meetup.MeetupRepo
+	repo *meetup.MeetupRepo
 }
 
 func NewMeetupClient(ctx context.Context) MeetupService {
 	return MeetupService{
 		Context: ctx,
-		repo:    meetup.NewRepo(),
+		repo:    meetup.NewMeetupRepo(),
 	}
 }
 
@@ -28,7 +28,7 @@ func (srv MeetupService) CreateMeetup(req string) (string, error) {
 		return "Error parsing meetup", err
 	}
 
-	created, err := srv.repo.CreateMeetup(*meetupToInsert)
+	created, err := srv.repo.CreateMeetup(meetupToInsert)
 	if err != nil {
 		return "", err
 	}

@@ -8,16 +8,22 @@ import (
 
 type MeetupRepo struct{}
 
+func NewMeetupRepo() *MeetupRepo {
+	return &MeetupRepo{}
+}
+
 var (
 	meetups []*meetup.Meetup
 )
 
-func NewRepo() MeetupRepo {
-	return MeetupRepo{}
+type Repo interface {
+	CreateMeetup(*meetup.Meetup) (bool, error)
+	GetMeetup(string) (*meetup.Meetup, error)
+	GetAllMeetups() ([]*meetup.Meetup, error)
 }
 
-func (repo MeetupRepo) CreateMeetup(meetup meetup.Meetup) (bool, error) {
-	meetups = append(meetups, &meetup)
+func (repo MeetupRepo) CreateMeetup(meetup *meetup.Meetup) (bool, error) {
+	meetups = append(meetups, meetup)
 	return true, nil
 }
 
