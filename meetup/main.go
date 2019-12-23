@@ -2,58 +2,59 @@ package meetup
 
 import (
 	"context"
-	"fmt"
+	"errors"
+	"github.com/AllenKaplan/alphabot/meetup/handler"
+	proto "github.com/AllenKaplan/alphabot/meetup/proto"
 	"strings"
 	"time"
 )
 
-type MeetupService struct{
+type MeetupService struct {
 	context.Context
-}
-
-type Meetup struct {
-	Name string
-	Location string
-	Time time.Time
-}
-
-func (m Meetup) String() string {
-	return fmt.Sprintf("%s | %s | %s", m.Name, m.Location, m.Time)
+	repo meetup.MeetupRepo
 }
 
 func NewMeetupClient(ctx context.Context) MeetupService {
 	return MeetupService{
 		Context: ctx,
+		repo:    meetup.NewRepo(),
 	}
 }
 
+func (srv MeetupService) CreateMeetup(req string) (string, error) {
+	params := strings.Fields(req)
 
-func (s MeetupService) CreateMeetup(req string) (string, error) {
-	params := strings.Split(req, " ")
-
-	meetupTime, err := time.Parse("2006-01-01" ,params[2])
+	meetupTime, err := time.Parse("2006-01-02", params[2])
 	if err != nil {
 		return "", err
 	}
 
-	meetupToInsert := &Meetup{
+	meetupToInsert := &proto.Meetup{
 		Name:     params[0],
 		Location: params[1],
 		Time:     meetupTime,
 	}
 
-	res, err := Cr
+	created, err := srv.repo.CreateMeetup(*meetupToInsert)
 	if err != nil {
 		return "", err
 	}
 
-	return res, nil
+	if !created {
+		return "", errors.New("go.bot.meetup.CreateMeetup | Could not create meetup")
+	}
+
+	return "Meetup Created", nil
 }
 
-func (s MeetupService) GetMeetup(req string) (interface{}, interface{}) {
-	res, err := s.GetMeetup(req)
+func (srv MeetupService) GetMeetup(req string) (*proto.Meetup, error) {
+	res, err := srv.repo.GetMeetup(req)
 	if err != nil {
-		return "", err
+		return nil, err
+	}
+
+	if res == nil {
+		return nil, errors.New("No meetup found by req: " + req)
 	}
 
 	return res, nil

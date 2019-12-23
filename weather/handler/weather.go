@@ -28,23 +28,22 @@ func GetWeatherByLocation(location string) (string, error) {
 	temp := w.Main.Temp
 
 	tempDictionary := map[float64]string{
-		30:	"Hot AF",
-		25:	"Hot",
-		20:	"Warm",
-		15:	"Pleasant",
-		10:	"Kinda hot; Kinda warm",
-		0:	"Drafty",
-		-10:"Chilly",
-		-20:"Cold",
-		-30:"Freezing",
-		-40:"Crazy Freezing!",
-		-60:"SUPER DUPER FREEZING!!!",
-		-273:"This is so cold this is probably wrong",
+		30:   "Hot AF",
+		25:   "Hot",
+		20:   "Warm",
+		15:   "Pleasant",
+		10:   "Kinda hot; Kinda warm",
+		0:    "Drafty",
+		-10:  "Chilly",
+		-20:  "Cold",
+		-30:  "Freezing",
+		-40:  "Crazy Freezing!",
+		-60:  "SUPER DUPER FREEZING!!!",
+		-273: "This is so cold this is probably wrong",
 	}
 
-
-	for currentCutoffTemp, response := range tempDictionary{
-		if temp > currentCutoffTemp{
+	for currentCutoffTemp, response := range tempDictionary {
+		if temp > currentCutoffTemp {
 			feeling = response
 			break
 		}
@@ -55,7 +54,7 @@ func GetWeatherByLocation(location string) (string, error) {
 		weather = w.Weather[0].Description
 	}
 
-	returnString := fmt.Sprintf("GetWeather in %s\n%s | %s | %.1f°C", w.Name, feeling, strings.Title(weather), temp)
+	returnString := fmt.Sprintf("Weather in %s\n%s | %s | %.1f°C", w.Name, feeling, strings.Title(weather), temp)
 
 	return returnString, nil
 }

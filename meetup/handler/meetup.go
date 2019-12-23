@@ -1,33 +1,32 @@
 package meetup
 
 import (
-	"fmt"
-	"github.com/AllenKaplan/alphabot/meetup"
+	"errors"
+
+	"github.com/AllenKaplan/alphabot/meetup/proto"
 )
 
-type MeetupRepo struct {}
+type MeetupRepo struct{}
 
 var (
 	meetups []meetup.Meetup
 )
 
-type MeetupService interface {
-	CreateMeetup(meetup.Meetup) string
-	GetMeetup(string) meetup.Meetup
+func NewRepo() MeetupRepo {
+	return MeetupRepo{}
 }
 
-func (repo MeetupRepo) CreateMeetup(meetup meetup.Meetup) string {
+func (repo MeetupRepo) CreateMeetup(meetup meetup.Meetup) (bool, error) {
 	meetups = append(meetups, meetup)
-	return fmt.Sprintf("Added meetup: %v", meetup)
+	return true, nil
 }
 
-func (repo MeetupRepo)  GetMeetup(name string) string {
+func (repo MeetupRepo) GetMeetup(name string) (*meetup.Meetup, error) {
 	for _, currentMeetup := range meetups {
 		if name == currentMeetup.Name {
-			return currentMeetup
+			return &currentMeetup, nil
 		}
 	}
 
-	return "Could not find meetup"
+	return nil, errors.New("go.bot.meetup.repo.GetMeetup - Meetup not found")
 }
-
