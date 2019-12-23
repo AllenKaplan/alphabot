@@ -9,7 +9,7 @@ import (
 type MeetupRepo struct{}
 
 var (
-	meetups []meetup.Meetup
+	meetups []*meetup.Meetup
 )
 
 func NewRepo() MeetupRepo {
@@ -17,16 +17,20 @@ func NewRepo() MeetupRepo {
 }
 
 func (repo MeetupRepo) CreateMeetup(meetup meetup.Meetup) (bool, error) {
-	meetups = append(meetups, meetup)
+	meetups = append(meetups, &meetup)
 	return true, nil
 }
 
 func (repo MeetupRepo) GetMeetup(name string) (*meetup.Meetup, error) {
 	for _, currentMeetup := range meetups {
 		if name == currentMeetup.Name {
-			return &currentMeetup, nil
+			return currentMeetup, nil
 		}
 	}
 
 	return nil, errors.New("go.bot.meetup.repo.GetMeetup - Meetup not found")
+}
+
+func (repo MeetupRepo) GetAllMeetups() ([]*meetup.Meetup, error) {
+	return meetups, nil
 }

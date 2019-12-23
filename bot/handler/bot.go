@@ -2,11 +2,14 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/AllenKaplan/alphabot/meetup"
 	"github.com/AllenKaplan/alphabot/weather"
 	"github.com/bwmarrin/discordgo"
 	"log"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type Client struct {
@@ -106,7 +109,31 @@ func (client *Client) GetWeather() {
 		log.Printf("error getting weather: %s | %v", cmd, err)
 	}
 
-	if msg, err := client.session.ChannelMessageSend(client.message.ChannelID, res); err != nil {
+	embeddedMsg := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{},
+		Title:       "Weather in " + res.Name + " | " + res.Weather[0].Main,
+		Timestamp:   time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+		Color:       0x0000ff,                        // Blue
+		Description: "`,weather get [location]`",
+		Fields: []*discordgo.MessageEmbedField{
+			&discordgo.MessageEmbedField{
+				Name: "Temperature",
+				Value: fmt.Sprintf("%.1f	°C", res.Main.Temp),
+			},
+			&discordgo.MessageEmbedField{
+				Name:  "Full Weather Desc",
+				Value: strings.Title(res.Weather[0].Description),
+			},
+			&discordgo.MessageEmbedField{
+				Name:  "Humidity",
+				Value: strconv.Itoa(res.Main.Humidity),
+			},
+		},
+		Thumbnail: &discordgo.MessageEmbedThumbnail{
+			URL: "http://openweathermap.org/img/w/" + res.Weather[0].Icon + ".png",
+		},
+	}
+
+	if msg, err := client.session.ChannelMessageSendEmbed(client.message.ChannelID, embeddedMsg); err != nil {
 		log.Printf("error sending message | %v | %v", msg, err)
 	}
 }
@@ -133,19 +160,71 @@ func (client *Client) GetMeetup() {
 	log.Printf("go.bot.handler.GetMeetup request recieved")
 
 	cmd := client.ctx.Value("cmd").(string)
-	cmd = strings.TrimPrefix(cmd, "get ")
+	cmd = strings.TrimPrefix(cmd, "get")
+	cmd = strings.TrimPrefix(cmd, " ")
 	client.ctx = context.WithValue(client.ctx, "cmd", cmd)
 
-	res := "Could not get meetup"
+	if cmd == "all" {
+		client.GetAllMeetups()
+		return
+	}
+
 	meetupClient := meetup.NewMeetupClient(client.ctx)
 	meetupRes, err := meetupClient.GetMeetup(cmd)
 	if err != nil {
 		log.Printf("go.bot.handler.GetMeetup getting meetup: %s | %v", cmd, err)
-	} else {
-		res = meetupRes.String()
+		return
 	}
 
-	if msg, err := client.session.ChannelMessageSend(client.message.ChannelID, res); err != nil {
-		log.Printf("go.bot.handler.GetMeetup sending message | %v | %v", msg, err)
+	embeddedMsg := &discordgo.MessageEmbed{
+		Author:      &discordgo.MessageEmbedAuthor{},
+		Title:       "Meetup Info",
+		Timestamp:   meetupRes.Time.Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+		Color:       0xff00ff,                            // Blue
+		Description: "Meetup Info `,meetup get [name]`",
+		Fields: []*discordgo.MessageEmbedField{
+			&discordgo.MessageEmbedField{
+				Name:  "Name",
+				Value: meetupRes.Name,
+			},
+			&discordgo.MessageEmbedField{
+				Name:  "Location",
+				Value: meetupRes.Location,
+			},
+			&discordgo.MessageEmbedField{
+				Name:  "Time",
+				Value: meetupRes.Time.Format(time.RFC3339),
+			},
+		},
+	}
+
+	if msg, err := client.session.ChannelMessageSendEmbed(client.message.ChannelID, embeddedMsg); err != nil {
+		log.Printf("error sending message | %v | %v", msg, err)
+	}
+}
+
+func (client *Client) GetAllMeetups() {
+	log.Printf("go.bot.handler.GetMeetup request recieved")
+
+	cmd := client.ctx.Value("cmd").(string)
+	cmd = strings.TrimPrefix(cmd, "get")
+	cmd = strings.TrimPrefix(cmd, " ")
+	client.ctx = context.WithValue(client.ctx, "cmd", cmd)
+
+	meetupClient := meetup.NewMeetupClient(client.ctx)
+	meetupRes, err := meetupClient.GetAllMeetups(cmd)
+	if err != nil {
+		log.Printf("go.bot.handler.GetMeetup getting meetups: %s | %v", cmd, err)
+		return
+	}
+
+	var meetups string
+
+	for _, curMeetup := range meetupRes {
+		meetups = meetups + "\n" + curMeetup.String()
+	}
+
+	if msg, err := client.session.ChannelMessageSend(client.message.ChannelID, meetups); err != nil {
+		log.Printf("error sending message | %v | %v", msg, err)
 	}
 }

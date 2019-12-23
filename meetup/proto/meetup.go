@@ -12,5 +12,5 @@ type Meetup struct {
 }
 
 func (m Meetup) String() string {
-	return fmt.Sprintf("%s | %s | %s", m.Name, m.Location, m.Time.Format("2006-01-02"))
+	return fmt.Sprintf("%s | %s | %s", m.Name, m.Location, m.Time.Format(time.RFC3339))
 }
