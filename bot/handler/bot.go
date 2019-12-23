@@ -75,8 +75,8 @@ func Handler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	client.ctx = context.WithValue(client.ctx, "cmd", cmd)
 
 	routes := map[*Route]interface{}{
-		&Route{"weather", "`,weather get [location]` - Gets weather information "}: client.Weather,
-		&Route{"meetup", "`,meetup help` - Gets meetup information"}:               client.Meetup,
+		&Route{"weather", "`,weather help` - Weather info from Open Weather Maps "}:      client.Weather,
+		&Route{"meetup", "`,meetup help` - Plan and execute meetups with your friends!"}: client.Meetup,
 	}
 
 	router := &Router{routes: routes}
