@@ -21,7 +21,7 @@ type Weather interface {
 }
 
 func (s WeatherService) GetWeatherByLocation(req string) (*openweathermap.CurrentWeatherData, error) {
-	res, err := weather.GetWeatherByLocation(req)
+	res, err := handler.GetWeatherByLocation(req)
 	if err != nil {
 		return nil, err
 	}

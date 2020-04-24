@@ -1,4 +1,4 @@
-package weather
+package handler
 
 import (
 	owm "github.com/briandowns/openweathermap"

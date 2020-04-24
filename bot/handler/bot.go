@@ -23,7 +23,7 @@ type Router struct {
 }
 
 type Route struct {
-	string
+	name string
 	description string
 }
 
@@ -35,7 +35,7 @@ func (r *Router) handleRoute(c *Client) {
 	}
 
 	for routeName, routeFunc := range r.routes {
-		if strings.HasPrefix(cmd, routeName.string) {
+		if strings.HasPrefix(cmd, routeName.name) {
 			log.Printf("Route found based on command | %s -> %s", cmd, routeName)
 			routeFunc.(func())()
 		}
@@ -54,7 +54,7 @@ func (r *Router) help(c *Client) {
 	}
 }
 
-func Handler(s *discordgo.Session, m *discordgo.MessageCreate) {
+func NewBotHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	prefix := ","
 	ctx := context.WithValue(context.Background(), "prefix", prefix)
 	client := Client{ctx, s, m}
@@ -166,8 +166,8 @@ func (client *Client) CreateMeetup() {
 	cmd = strings.TrimPrefix(cmd, "create ")
 	client.ctx = context.WithValue(client.ctx, "cmd", cmd)
 
-	weatherClient := meetup.NewMeetupClient(client.ctx)
-	res, err := weatherClient.CreateMeetup(cmd)
+	meetupClient := meetup.NewMeetupClient(client.ctx)
+	res, err := meetupClient.CreateMeetup(cmd)
 	if err != nil {
 		log.Printf("go.bot.handler.CreateMeetup : %s | %v", cmd, err)
 	}

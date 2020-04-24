@@ -1,4 +1,4 @@
-package main
+package bot
 
 import (
 	"flag"
@@ -38,7 +38,7 @@ func main() {
 	defer discord.Close()
 
 	// Register the messageCreate func as a callback for MessageCreate events.
-	discord.AddHandler(handler.Handler)
+	discord.AddHandler(handler.NewBotHandler)
 
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Client is now running.  Press CTRL-C to exit.")

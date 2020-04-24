@@ -3,26 +3,26 @@ package meetup
 import (
 	"context"
 	"errors"
-	"github.com/AllenKaplan/alphabot/meetup/handler"
-	proto "github.com/AllenKaplan/alphabot/meetup/proto"
+	"github.com/AllenKaplan/alphabot/meetup/proto"
+	repository "github.com/AllenKaplan/alphabot/meetup/repo"
 	"regexp"
 	"strings"
 	"time"
 )
 
-type MeetupService struct {
+type Meetup struct {
 	context.Context
-	repo *meetup.MeetupRepo
+	repo *repository.MeetupRepo
 }
 
-func NewMeetupClient(ctx context.Context) MeetupService {
-	return MeetupService{
+func NewMeetupClient(ctx context.Context) Meetup {
+	return Meetup{
 		Context: ctx,
-		repo:    meetup.NewMeetupRepo(),
+		repo:    repository.InitRepo(),
 	}
 }
 
-func (srv MeetupService) CreateMeetup(req string) (string, error) {
+func (srv *Meetup) CreateMeetup(req string) (string, error) {
 	meetupToInsert, err := parseMeetup(req)
 	if err != nil {
 		return "Error parsing meetup", err
@@ -40,7 +40,7 @@ func (srv MeetupService) CreateMeetup(req string) (string, error) {
 	return "Meetup Created ", nil
 }
 
-func (srv MeetupService) GetMeetup(req string) (*proto.Meetup, error) {
+func (srv *Meetup) GetMeetup(req string) (*meetup.Meetup, error) {
 	res, err := srv.repo.GetMeetup(req)
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func (srv MeetupService) GetMeetup(req string) (*proto.Meetup, error) {
 	return res, nil
 }
 
-func (srv MeetupService) GetAllMeetups(s string) ([]*proto.Meetup, error) {
+func (srv *Meetup) GetAllMeetups(s string) ([]*meetup.Meetup, error) {
 	res, err := srv.repo.GetAllMeetups()
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (srv MeetupService) GetAllMeetups(s string) ([]*proto.Meetup, error) {
 	return res, nil
 }
 
-func parseMeetup(s string) (*proto.Meetup, error) {
+func parseMeetup(s string) (*meetup.Meetup, error) {
 	regex := regexp.MustCompile("[^\\s\"][\\w\\s'-:]+")
 	params := regex.FindAllString(s, -1)
 
@@ -86,7 +86,7 @@ func parseMeetup(s string) (*proto.Meetup, error) {
 		return nil, err
 	}
 
-	meetupToInsert := &proto.Meetup{
+	meetupToInsert := &meetup.Meetup{
 		Name:     strings.TrimSpace(params[0]),
 		Location: strings.TrimSpace(params[1]),
 		Time:     meetupTime,

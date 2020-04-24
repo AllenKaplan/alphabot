@@ -1,42 +1,44 @@
-package meetup
+package handler
 
 import (
-	"errors"
-
 	"github.com/AllenKaplan/alphabot/meetup/proto"
 )
 
-type MeetupRepo struct{}
-
-func NewMeetupRepo() *MeetupRepo {
-	return &MeetupRepo{}
+type MeetupService struct{
+	repo MeetupRepo
 }
 
-var (
-	meetups []*meetup.Meetup
-)
-
-type Repo interface {
+func NewMeetupService() *MeetupService {
+	return &MeetupService{}
+}
+type MeetupRepo interface {
 	CreateMeetup(*meetup.Meetup) (bool, error)
 	GetMeetup(string) (*meetup.Meetup, error)
 	GetAllMeetups() ([]*meetup.Meetup, error)
 }
 
-func (repo MeetupRepo) CreateMeetup(meetup *meetup.Meetup) (bool, error) {
-	meetups = append(meetups, meetup)
-	return true, nil
+func (s MeetupService) CreateMeetup(req *meetup.Meetup) (bool, error) {
+	created, err := s.CreateMeetup(req)
+	if err != nil {
+		return false, err
+	}
+	return created, nil
 }
 
-func (repo MeetupRepo) GetMeetup(name string) (*meetup.Meetup, error) {
-	for _, currentMeetup := range meetups {
-		if name == currentMeetup.Name {
-			return currentMeetup, nil
-		}
+func (s MeetupService) GetMeetup(name string) (*meetup.Meetup, error) {
+	res, err := s.GetMeetup(name)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, errors.New("go.bot.meetup.repo.GetMeetup - Meetup not found")
+	return res, nil
 }
 
-func (repo MeetupRepo) GetAllMeetups() ([]*meetup.Meetup, error) {
-	return meetups, nil
+func (s MeetupService) GetAllMeetups() ([]*meetup.Meetup, error) {
+	res, err := s.GetAllMeetups()
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
