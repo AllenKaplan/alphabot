@@ -1,4 +1,4 @@
-package handler
+package meetup
 
 import (
 	"github.com/AllenKaplan/alphabot/meetup/proto"

@@ -1,4 +1,4 @@
-package handler
+package bot
 
 import (
 	"context"

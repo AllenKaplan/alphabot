@@ -2,7 +2,4 @@ module github.com/AllenKaplan/alphabot/weather
 
 go 1.13
 
-require (
-	github.com/jinzhu/gorm v1.9.11
-	github.com/lib/pq v1.2.0
-)
+require github.com/briandowns/openweathermap v0.13.0
