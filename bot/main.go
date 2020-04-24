@@ -3,13 +3,11 @@ package bot
 import (
 	"flag"
 	"fmt"
-	"github.com/AllenKaplan/alphabot/bot/handler"
+	"github.com/bwmarrin/discordgo"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/bwmarrin/discordgo"
 )
 
 // Variables used for command line parameters
@@ -38,7 +36,7 @@ func main() {
 	defer discord.Close()
 
 	// Register the messageCreate func as a callback for MessageCreate events.
-	discord.AddHandler(handler.NewBotHandler)
+	discord.AddHandler(bot.NewBotHandler)
 
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Client is now running.  Press CTRL-C to exit.")
