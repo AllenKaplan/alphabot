@@ -1,4 +1,4 @@
-module github.com/AllenKaplan/alphabot
+module github.com/AllenKaplan/alphabot/bot
 
 go 1.13
 
